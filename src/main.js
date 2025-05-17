@@ -1,7 +1,7 @@
 import './style.css'
 import axios from 'axios'
-import { formatDateForDeepLink, generateDeepLink, getStopFinderURL, findBestStop, updateLocationsList } from './utils/utils'
-import { validateForm, validateNavigation, showValidationErrors, clearValidationErrors } from './utils/validate'
+import { formatDateForDeepLink, generateDeepLink, getStopFinderURL, findBestStop, updateLocationsList, debounce } from './utils/utils'
+import { validateNavigation, showValidationErrors, clearValidationErrors } from './utils/validate'
 
 // Global state
 const toAddress = "Mergelteichstraße 80, 44225 Dortmund";
@@ -64,7 +64,7 @@ const fetchInitialData = async () => {
 }
 
 /**
- * Handles the search button click to fetch locations for the entered address
+ * Handles the search to fetch locations for the entered address
  * @async
  * @returns {Promise<void>}
  */
@@ -76,17 +76,14 @@ const handleSearch = async () => {
     fromAddress: document.getElementById('fromAddress').value
   }
   
-  // Validate form data
-  const validation = validateForm(formData)
-  
-  // Show validation errors if any
-  if (!validation.isValid) {
-    showValidationErrors(validation.errors)
+  // Skip search if address is empty
+  if (!formData.fromAddress.trim()) {
     return
   }
   
-  // Clear any previous validation errors
-  clearValidationErrors()
+  // Add loading indicator to results
+  const results = document.getElementById('results')
+  results.innerHTML = '<p class="text-gray-600">Suche läuft...</p>'
   
   try {
     const response = await axios.get(getStopFinderURL(formData.fromAddress))
@@ -96,15 +93,18 @@ const handleSearch = async () => {
     
     // If no results found, show error message
     if (!response.data.locations || response.data.locations.length === 0) {
-      const results = document.getElementById('results')
       results.innerHTML = '<p class="text-amber-500">Keine Haltestellen für diese Adresse gefunden. Bitte versuchen Sie eine andere Adresse.</p>'
     }
   } catch (error) {
     console.error('Error searching:', error)
-    const results = document.getElementById('results')
     results.innerHTML = '<p class="text-red-500">Fehler bei der Suche</p>'
   }
 }
+
+/**
+ * Debounced version of the search handler
+ */
+const debouncedSearch = debounce(handleSearch, 500)
 
 /**
  * Handles the goto button click to generate a deep link and open it
@@ -165,10 +165,13 @@ const initApp = () => {
   
   // Add event listeners
   document.addEventListener('DOMContentLoaded', () => {
-    const searchButton = document.getElementById('searchButton')
     const gotoButton = document.getElementById('gotoButton')
+    const fromAddressInput = document.getElementById('fromAddress')
     
-    searchButton.addEventListener('click', handleSearch)
+    // Add input event listener with debounce for address search
+    fromAddressInput.addEventListener('input', debouncedSearch)
+    
+    // Add navigation button event listener
     gotoButton.addEventListener('click', handleNavigation)
     
     // Add input event listeners to clear validation errors when typing

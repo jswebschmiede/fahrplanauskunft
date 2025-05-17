@@ -119,3 +119,21 @@ export const formatDateForDeepLink = (dateStr) => {
       results.innerHTML = '<p class="text-gray-500">Keine Ergebnisse gefunden</p>'
     }
   }
+
+  /**
+   * Implementiert die Debounce-Funktion für verzögertes Ausführen von Funktionen
+   * @param {Function} func - Die auszuführende Funktion
+   * @param {number} wait - Die Verzögerungszeit in Millisekunden
+   * @returns {Function} - Die debounced Funktion
+   */
+  export const debounce = (func, wait) => {
+    let timeout
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout)
+        func(...args)
+      }
+      clearTimeout(timeout)
+      timeout = setTimeout(later, wait)
+    }
+  }
