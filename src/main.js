@@ -31,7 +31,7 @@ const handleLocationSelection = (location, listItem) => {
   
   // Clear any validation errors when an option is selected
   clearValidationErrors()
-}
+ }
 
 /**
  * Fetches initial data for the destination address

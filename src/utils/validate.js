@@ -86,45 +86,6 @@ export const validateTime = (time) => {
 }
 
 /**
- * Validiert alle Formularfelder
- * @param {Object} formData - Objekt mit allen Formulardaten (date, time, fromAddress)
- * @returns {Object} Validierungsergebnis mit isValid, errors und firstError Eigenschaften
- */
-export const validateForm = (formData) => {
-  const errors = {}
-  
-  // Validiere jedes Feld
-  const addressValidation = validateAddress(formData.fromAddress)
-  const dateValidation = validateDate(formData.date)
-  const timeValidation = validateTime(formData.time)
-  
-  // Speichere Fehlermeldungen, falls vorhanden
-  if (!addressValidation.isValid) {
-    errors.fromAddress = addressValidation.message
-  }
-  
-  if (!dateValidation.isValid) {
-    errors.date = dateValidation.message
-  }
-  
-  if (!timeValidation.isValid) {
-    errors.time = timeValidation.message
-  }
-  
-  // Bestimme, ob das Formular gültig ist
-  const isValid = Object.keys(errors).length === 0
-  
-  // Gib den ersten Fehler zurück, falls vorhanden
-  const firstError = Object.values(errors)[0] || ''
-  
-  return {
-    isValid,
-    errors,
-    firstError
-  }
-}
-
-/**
  * Zeigt Validierungsfehler im Formular an
  * @param {Object} errors - Objekt mit Fehlermeldungen für jedes Feld
  * @returns {void}

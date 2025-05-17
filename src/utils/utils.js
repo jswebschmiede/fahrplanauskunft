@@ -12,24 +12,6 @@ export const formatDateForDeepLink = (dateStr) => {
   }
   
   /**
-   * Gets the current date formatted for deep link (DDMMYYYY)
-   * @returns {string} Current date in DDMMYYYY format
-   */
-  export const getFormattedCurrentDate = () => {
-    const today = new Date()
-    return formatDateForDeepLink(today.toISOString().split('T')[0])
-  }
-  
-  /**
-   * Gets the current time formatted for deep link (HHmm)
-   * @returns {string} Current time in HHmm format (24h)
-   */
-  export const getFormattedCurrentTime = () => {
-    const now = new Date()
-    return String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0')
-  }
-  
-  /**
    * Generates a deep link URL for journey planning
    * @param {string} originId - The ID of the origin station
    * @param {string} date - Date in DDMMYYYY format
@@ -93,10 +75,17 @@ export const formatDateForDeepLink = (dateStr) => {
     if (locations && locations.length > 0) {
       const ul = document.createElement('ul')
       ul.className = 'space-y-2'
+      // Add ARIA role for better accessibility
+      ul.setAttribute('role', 'listbox')
+      ul.setAttribute('aria-label', 'Gefundene Haltestellen')
 
-      locations.forEach(location => {
+      locations.forEach((location, index) => {
         const li = document.createElement('li')
-        li.className = 'location-item p-3 border border-gray-300 bg-gray-50 rounded-md hover:bg-gray-100 cursor-pointer'
+        // Make the li element focusable and tabbable
+        li.setAttribute('tabindex', '0')
+        li.setAttribute('role', 'option')
+        li.setAttribute('aria-selected', 'false')
+        li.className = 'location-item p-3 border border-gray-300 bg-gray-50 rounded-md hover:bg-gray-100 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-blue-50'
         li.textContent = location.name
         
         // Add data attributes
@@ -111,10 +100,21 @@ export const formatDateForDeepLink = (dateStr) => {
           onLocationClick(location, li)
         })
 
+        // Add keyboard event listener for Enter key only
+        li.addEventListener('keydown', (e) => {
+          // Enter key selects the location
+          if (e.key === 'Enter') {
+            e.preventDefault()
+            onLocationClick(location, li)
+          }
+        })
+
         ul.appendChild(li)
       })
 
       results.appendChild(ul)
+      
+      // Don't automatically focus the first item - let normal tab flow work
     } else {
       results.innerHTML = '<p class="text-gray-500">Keine Ergebnisse gefunden</p>'
     }
